@@ -1,24 +1,24 @@
-# this task is for download the latest SparkDemo artifact from Nexus and submit the SparkDemo job
+# this playbook downloads the latest SparkDemo artifact from Nexus and submit the SparkDemo job
 
-- name : Download the SparkDemo artifact
-  hosts : all
+- name: Download the SparkDemo artifact
+  hosts: all
   any_errors_fatal: true
   become: yes
   become_user: hdfs
   gather_facts: False
   vars:
     nexus:
-      host : "localhost"
+      host: "localhost"
       # username : "tower"
       # userpassword : "tower"
-    repository : "http://{{ nexus.host }}:8081/nexus/content/repositories/snapshots"
-    groupId : "com.whishworks.spark"
-    artifact_id : "sparkdemo"
-    version : "1.0-SNAPSHOT"
-    extension : "jar"
-    demoClass : "SampleJob"
-    artifact_path : "/tmp/{{ artifact_id }}-{{ version }}.{{ extension }}"
-    result_file : "/tmp/sparksubmit-{{demoClass}}-{{ artifact_id }}-{{ version }}.output"
+    repository: "http://{{ nexus.host }}:8081/nexus/content/repositories/snapshots"
+    groupId: "com.whishworks.spark"
+    artifact_id: "sparkdemo"
+    version: "1.0-SNAPSHOT"
+    extension: "jar"
+    demoClass: "SampleJob"
+    artifact_path: "/tmp/{{ artifact_id }}-{{ version }}.{{ extension }}"
+    result_file: "/tmp/sparksubmit-{{demoClass}}-{{ artifact_id }}-{{ version }}.output"
   tasks:
     - name: Update repository URL ( for releases)
       set_fact: repository="http://{{ nexus.host }}:8081/nexus/content/repositories/releases"
@@ -34,26 +34,26 @@
     - name: Download the artifact from Nexus
       maven_artifact: group_id="{{ groupId }}" artifact_id="{{ artifact_id }}" repository_url="{{ repository }}" username="{{ nexus.username | default(omit)}}" password="{{ nexus.userpassword  | default(omit)}}" version="{{ version }}" classifier="{{ classifier | default(omit)}}" extension="{{ extension }}" validate_certs=no dest="{{ artifact_path }}" version="{{ version }}"
 
-- name : Run the SparkDemo - {{ demoClass }}
-  hosts : all
+- name: Run the SparkDemo - {{ demoClass }}
+  hosts: all
   any_errors_fatal: true
   become: yes
   become_user: hdfs
   gather_facts: False
   vars:
-    groupId : "com.whishworks.spark"
-    artifact_id : "sparkdemo"
-    version : "1.0-SNAPSHOT"
-    extension : "jar"
-    demoClass : "SampleJob"
-    artifact_path : "/tmp/{{ artifact_id }}-{{ version }}.{{ extension }}"
-    result_file : "/tmp/sparksubmit-{{demoClass}}-{{ artifact_id }}-{{ version }}.output"
+    groupId: "com.whishworks.spark"
+    artifact_id: "sparkdemo"
+    version: "1.0-SNAPSHOT"
+    extension: "jar"
+    demoClass: "SampleJob"
+    artifact_path: "/tmp/{{ artifact_id }}-{{ version }}.{{ extension }}"
+    result_file: "/tmp/sparksubmit-{{demoClass}}-{{ artifact_id }}-{{ version }}.output"
   tasks:
     - block:
-        - name : Submit the Spark job
-          shell : "spark-submit --master yarn --class {{ groupId + '.' + demoClass}} {{ artifact_path }} > {{ result_file }}"
+        - name: Submit the Spark job
+          shell: "spark-submit --master yarn --class {{ groupId + '.' + demoClass}} {{ artifact_path }} > {{ result_file }}"
           args:
-            chdir : "/tmp/"
+            chdir: "/tmp/"
             executable: /bin/bash
           environment:
             SPARK_MAJOR_VERSION : 2 #Run Job on Spark2
